@@ -1,1 +1,6 @@
-site :opscode
+source "https://supermarket.chef.io"
+
+# cookbook 'build-essential', '~> 2.2.3'
+# cookbook 'chef-solo-search', '~> 0.5.1'
+cookbook 'application', '~> 3.0.0'
+cookbook 'application_nginx', '~> 2.0.2'

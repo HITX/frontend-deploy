@@ -1,0 +1,7 @@
+{
+  "run_list":
+  [
+    "role[internshyps_load_balancer]",
+    "role[internshyps_application_server]"
+  ]
+}
