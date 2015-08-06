@@ -25,8 +25,8 @@ RUN chef gem install knife-solo
 RUN chef gem install knife-solo_data_bag
 
 # Create work directory
-RUN mkdir -p /project/save_frontend_deployment
-WORKDIR /project/save_frontend_deployment
+RUN mkdir -p /project/internshyps_frontend_deploy
+WORKDIR /project/internshyps_frontend_deploy
 
 # Create python virtualenv and install required python packages
 ADD ./requirements.txt requirements.txt

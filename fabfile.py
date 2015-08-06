@@ -34,6 +34,7 @@ env.root_directory = os.path.dirname(os.path.realpath(__file__))
 env.deploy_directory = os.path.join(env.root_directory, 'deploy')
 env.app_settings_directory = os.path.join(env.deploy_directory, 'settings')
 env.app_settings_base = os.path.join(env.app_settings_directory, 'base.json')
+env.app_settings_deploy_key = os.path.join(env.app_settings_directory, 'deploy_key')
 env.fab_hosts_directory = os.path.join(env.deploy_directory, 'fab_hosts')
 env.ssh_directory = os.path.join(env.deploy_directory, 'ssh')
 env.aws_ssh_key_extension = '.pem'
@@ -186,7 +187,7 @@ def ssh(name):
         open_shell()
 
 @task
-def bootstrap(name, no_install=False):
+def bootstrap(name, no_install=False, should_bag=False):
     """
     Bootstrap the specified server. Install chef then run chef solo.
     :param name: The name of the node to be bootstrapped
@@ -198,8 +199,8 @@ def bootstrap(name, no_install=False):
     print(_green("--BOOTSTRAPPING {}--".format(name)))
     f = open("deploy/fab_hosts/{}.txt".format(name))
     env.host_string = "ubuntu@{}".format(f.readline().strip())
-    # if dbname != None:
-    #     build_databag(dbname)
+    if should_bag:
+        build_databag()
     if not no_install:
         install_chef()
     run_chef(name)
@@ -234,6 +235,41 @@ def connect_to_ec2():
     if not ec2_connection:
         raise Exception("We're having a problem connecting to your AWS account. Are you sure you entered your credentials correctly?")
     return ec2_connection
+
+def build_databag():
+    print(_yellow("--BUILDING DATA BAG--"))
+
+    # Add ec2 host to tmp settings
+    tmp_settings = {'EC2_HOST': env.host_string}
+
+    # Add base settings to tmp settings
+    with open(env.app_settings_base, 'r') as f:
+        tmp_settings.update(json.load(f))
+
+    # Add deploy key to tmp settings
+    with open(env.app_settings_deploy_key, 'r') as f:
+        tmp_settings.update({
+            'GITHUB_DEPLOY_KEY': f.read().replace('\n', '\\n')
+        })
+
+    # Write out tmp settings
+    tmp_settings_path = 'chef_repo/tmp_settings.json'
+    with open(tmp_settings_path, 'w') as f:
+        json.dump(tmp_settings, f)
+
+    data_bag_key_exists = os.path.isfile('chef_repo/data_bag_key')
+    with settings(warn_only=True):
+        with lcd('chef_repo'):
+            if not data_bag_key_exists:
+                # Create data bag key if not exists
+                local('openssl rand -base64 512 > data_bag_key')
+            # Create data bag
+            local('knife solo data bag create config config_1 --json-file tmp_settings.json')
+
+    # Delete tmp settings file
+    os.remove(tmp_settings_path)
+
+    return True
 
 def install_chef():
     """
