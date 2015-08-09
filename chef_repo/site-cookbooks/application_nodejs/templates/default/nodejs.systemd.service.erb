@@ -1,0 +1,14 @@
+[Service]
+ExecStart=<%= @node_dir %>/bin/node <%= @entry %>
+Restart=always
+WorkingDirectory=<%= @app_dir %>
+StandardOutput=syslog
+SyslogIdentifier=<%= @app_name %>
+User=<%= @user %>
+Group=<%= @group %>
+<% @environment.each do |key, value| -%>
+Environment=<%= key %>=<%= value %>
+<% end -%>
+
+[Install]
+WantedBy=multi-user.target
