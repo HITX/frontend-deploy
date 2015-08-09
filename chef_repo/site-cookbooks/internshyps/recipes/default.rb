@@ -3,9 +3,6 @@ user 'deploy' do
   shell '/bin/false'
 end
 
-# package 'upstart'
-# package 'upstart-sysv'
-
 application 'internshyps' do
   path '/srv/internshyps'
   owner 'deploy'
@@ -17,11 +14,9 @@ application 'internshyps' do
   nginx_load_balancer do
     only_if { node['roles'].include? 'internshyps_load_balancer' }
     application_port 8080
-    # static_files '/static' => 'static'
   end
 
   nodejs do
     only_if { node['roles'].include? 'internshyps_application_server' }
-    entry_point 'server.js'
   end
 end
