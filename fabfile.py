@@ -205,6 +205,28 @@ def bootstrap(name, no_install=False, should_bag=False):
         install_chef()
     run_chef(name)
 
+@task
+def deploy(name):
+
+    print(_green("--DEPLOYING {}--".format(name)))
+    f = open("deploy/fab_hosts/{}.txt".format(name))
+    env.host_string = "ubuntu@{}".format(f.readline().strip())
+    deploy_app(name)
+
+@task
+def restart(name=None):
+    if name is not None:
+        with open("deploy/fab_hosts/{}.txt".format(name)) as f:
+            env.host_string = "ubuntu@{}".format(f.readline().strip())
+
+    env.key_filename = env.aws_ssh_key_path
+
+    with settings(warn_only=True):
+        with open(env.app_settings_base) as f:
+            app_settings = json.load(f)
+        sudo('systemctl daemon-reload')
+        sudo('systemctl restart {app_name}_nodejs'.format(app_name=app_settings['APP_NAME']))
+        sudo('/etc/init.d/nginx reload')
 
 #------- HELPER FUNCTIONS ------
 
@@ -290,8 +312,26 @@ def run_chef(name):
     print(_yellow("--RUNNING CHEF--"))
     node = "./nodes/{name}_node.json".format(name=name)
     with lcd('chef_repo'):
-        # local("pwd")
         local("knife solo cook -i {key_file} {host} {node}".format(
             key_file=env.aws_ssh_key_path,
             host=env.host_string,
             node=node))
+
+def deploy_app(name):
+
+    print(_yellow("--DEPLOYING APP--"))
+    node = "./nodes/deploy_node.json".format(name=name)
+
+    with lcd('chef_repo'):
+        try:
+            # skip updating the Berkshelf cookbooks to save time
+            os.rename("chef_repo/Berksfile", "chef_repo/hold_Berksfile")
+            local("knife solo cook -i {key_file} {host} {node}".format(
+                key_file=env.aws_ssh_key_path,
+                host=env.host_string,
+                node=node))
+            restart()
+        except Exception as e:
+            print e
+        finally:
+            os.rename("chef_repo/hold_Berksfile", "chef_repo/Berksfile")

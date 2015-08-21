@@ -2,12 +2,9 @@ include_recipe 'application'
 
 api_settings = node['api']
 
-user 'deploy' do
-  supports :manage_home => true
-  home '/home/deploy'
-  shell '/bin/bash'
-  system true
-end
+puts 'TEST PRINTOUT:'
+puts api_settings
+puts api_settings['hostname']
 
 application 'internshyps' do
   path '/srv/internshyps'
@@ -55,12 +52,7 @@ application 'internshyps' do
     end
   end
 
-  nginx_load_balancer do
-    only_if { node['roles'].include? 'internshyps_load_balancer' }
-    application_port 8080
-  end
-
   nodejs do
-    only_if { node['roles'].include? 'internshyps_application_server' }
+    only_if { node['roles'].include? 'internshyps_deploy' }
   end
 end

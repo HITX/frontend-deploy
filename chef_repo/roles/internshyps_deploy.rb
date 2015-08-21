@@ -1,5 +1,5 @@
-name 'internshyps_application_server'
-description 'A node hosting a Node.js servering serving ReactJS webapp'
+name 'internshyps_deploy'
+description 'For deploying to an already bootstrapped webserver node'
 
 settings = Chef::EncryptedDataBagItem.load('config', 'config_1')
 debug = settings['DEBUG']
@@ -27,4 +27,4 @@ default_attributes(
   }
 )
 
-run_list 'recipe[internshyps]'
+run_list 'recipe[internshyps::deploy]'

@@ -1,6 +1,4 @@
 [Service]
-ExecStartPre=<%= @npm_dir %>/bin/npm install
-ExecStartPre=./node_modules/.bin/gulp
 ExecStart=<%= @npm_dir %>/bin/npm start
 Restart=always
 WorkingDirectory=<%= @app_dir %>

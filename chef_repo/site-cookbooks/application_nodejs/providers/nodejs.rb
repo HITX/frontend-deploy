@@ -84,6 +84,8 @@ action :before_restart do
       :app_name => new_resource.application.name
     )
   end
+
+  # TODO: Possibly run systemctl daemon-reload here (notify from template)
 end
 
 action :after_restart do
