@@ -13,6 +13,8 @@ api_hostname = settings['API_HOSTNAME']
 api_port = settings['API_PORT']
 api_client_id = settings['API_CLIENT_ID']
 api_client_secret = settings['API_CLIENT_SECRET']
+frontend_hostname = settings['FRONTEND_HOSTNAME']
+frontend_port = settings['FRONTEND_PORT']
 
 default_attributes(
   'app_name' => app_name,
@@ -24,6 +26,10 @@ default_attributes(
     'port' => api_port,
     'client_id' => api_client_id,
     'client_secret' => api_client_secret
+  },
+  'frontend' => {
+    'hostname' => frontend_hostname,
+    'port' => frontend_port
   }
 )
 

@@ -4,5 +4,10 @@ module.exports = {
   api: {
     hostname: '<%= @api_host %>',
     port: <%= @api_port %>
+  },
+  node_api: {
+    hostname: '<%= frontend_host %>',
+    port: <%= @frontend_port %>,
+    login_path: 'api/login'
   }
 };

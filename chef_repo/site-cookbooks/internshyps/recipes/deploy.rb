@@ -1,6 +1,7 @@
 include_recipe 'application'
 
 api_settings = node['api']
+frontend_settings = node['frontend']
 
 puts 'TEST PRINTOUT:'
 puts api_settings
@@ -35,7 +36,9 @@ application 'internshyps' do
       mode '0644'
       variables(
         :api_host => api_settings['hostname'],
-        :api_port => api_settings['port']
+        :api_port => api_settings['port'],
+        :frontend_host => frontend_settings['hostname'],
+        :frontend_port => frontend_settings['port'],
       )
     end
 
